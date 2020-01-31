@@ -80,7 +80,7 @@ class Drop {
 			for (var i = 0; i< random_int(3,12); i++){
 				let YSparksspeed = random_float(-10,-4);
 				let XSparksspeed = random_float(-3,3);
-				sparksArray.push(new Sparks(this.x ,this.y ,XSparksspeed,YSparksspeed,1));
+				sparksArray.push(new Sparks(this.x ,this.y ,XSparksspeed,YSparksspeed,this.radius*0.45));
 			}
 			this.hasExploded = true;
 		}
@@ -102,7 +102,7 @@ class Drop {
 
 				if (!this.hasExploded){
 					for (var i = 0; i< 3; i++){
-						sparksArray.push(new Sparks(this.x ,this.y ,-5 ,0.2,1));
+						sparksArray.push(new Sparks(this.x ,this.y ,-5 ,0.2,this.radius*0.45));
 					}
 					this.hasExploded = true
 				}
@@ -128,7 +128,7 @@ class Drop {
 
 function rain(){
     for(var i =0; i<num;i++){
-        var radius = 2;
+        var radius = 5;
         //var x = Math.random()*((innerWidth/2+20)-(innerWidth/2-20))+(innerWidth/2-20) ;
         var x = Math.random()*(innerWidth-5)-5
         var y = Math.random()*(-50+3)+3;
@@ -149,26 +149,64 @@ function rain(){
 	}
 }
 
-setInterval(rain,500)
+// Add drop with click and drag
+var longpress = false;
+var mouseX = 0;
+var mouseY = 0;
+canvas.addEventListener('mousedown', (event) => {
+	mouseX = event.offsetX;
+	mouseY = event.offsetY;
+	longpress = true;
+});
+
+// wheel control size :
+canvas.addEventListener('wheel', (event) => {
+	var size = Math.min(Math.max(.125, event.deltaY),-0.125);
+	console.log('SIZE : ', size)
+})
+
+canvas.addEventListener('mouseup', (event) => {
+	longpress = false;
+})
+
+//setInterval(rain,500)
 
 function animate(){
 	requestAnimationFrame(animate);
 	c.clearRect(0,0,innerWidth,innerHeight);
 
 	for(var i = 0; i< circleArray.length ;i++){
-		circleArray[i].update();
+		
 		if(circleArray[i].hasExploded){
 			circleArray.splice(i,1);
 		}
 		if(circleArray[i].y >= innerHeight){
 			circleArray.splice(i, 1);
 		}
+		else{
+			circleArray[i].update();
+		}
 	}
 	
 	for(var i = 0; i < sparksArray.length; i++){
-		sparksArray[i].update();
 		if(sparksArray[i].y >= innerHeight){
 			sparksArray.splice(i, 1);
+		}else{
+			sparksArray[i].update();
+		}
+		
+	}
+
+	if(longpress){
+		// drag and drop drops
+		canvas.addEventListener('mousemove', (event) => {
+			mouseX = event.offsetX;
+			mouseY = event.offsetY;
+		})
+		for (var i = 0; i < 2; i++){
+			var dx = random_float(-0.1,0.1);
+			var dy = random_float(-0.5,0.5)
+			circleArray.push(new Drop(mouseX, mouseY, dx, dy, 2))
 		}
 	}
 
